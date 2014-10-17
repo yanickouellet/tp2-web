@@ -1,0 +1,32 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    position:relative;
+}
+
+#carte-canvas {
+    height: 100%;
+    background-color: #ccc;
+}
+
+#configuration{
+    position:absolute;
+    right:0;
+    top:0;
+}
+
+#panneau-config {
+    position:absolute;
+    right:25px;
+    top:60px;
+    padding: 10px;
+    background-color: #d3d3d3;
+    border-radius: 20px;
+    visibility: hidden;
+    border: solid black 3px;
+}

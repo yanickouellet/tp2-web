@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!-- Syntaxe: HTML5 Polyglot, Conformité: HTML5 et XML (XHTML5) -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+	<meta charset="utf-8" />
+	<title>Exemple JavaScript : AJAX avec BD et réponse JSON (POST)</title>
+	<style>
+		@import "css/styles-ajax.css";
+	</style>
+	<!-- Fonctions DOM utilitaires -->
+	<script src="js/util-dom.js"></script>
+	<script>
+		// Objet XMLHttpRequest (variable globale).
+		var xhr;
+
+		// Ajout d'un gestionnaire d'événements lors de la soumission du formulaire.
+		window.addEventListener('DOMContentLoaded', function(e) {
+				$('form-prof').addEventListener('submit', function(e) {
+						afficherInfoProfAjax();
+						e.preventDefault();
+					}, false);
+			}, false);
+			
+		// Fonction appelée pour tenter de récupérer et d'afficher les informations
+		// d'un professeur avec AJAX.
+		function afficherInfoProfAjax() {
+			// Appel de la fonction retirant les informations dans l'interface avant
+			// d'exécuter une requête AJAX.
+			retirerInfo();
+			// Affichage de la section indiquant le chargement en cours.
+			$('chargement').style.visibility = 'visible';
+			// Désactivation des contrôles du formulaire.
+			$('surnom').disabled = true;
+			$('bth-afficher-info').disabled = true;
+		
+			// Création de l'objet XMLHttpRequest.
+			xhr = new XMLHttpRequest();
+
+			// Fonction JavaScript à exécuter lorsque l'état de la requête HTTP change.
+			xhr.onreadystatechange = afficherInfoProfAjaxCallback;
+			
+			// URL pour la requête HTTP avec AJAX (inclut le paramètre).
+			var URL = 'serveur-ajax-json-post.php?surnom=' + encodeURIComponent($('surnom').value.trim());
+			
+			// Préparation de la requête HTTP-POST en mode asynchrone (true).
+			xhr.open('POST', URL, true);
+			
+			// Envoie de la requête au serveur en lui passant null (aucun contenu);
+			// lorsque la requête changera d'état; la fonction "afficherInfoProfAJAX_callback" sera appelée.
+			xhr.send(null);
+
+		}  // Fin de "afficherInfoProfAjax"
+		
+		// Callback de la requête AJAX qui demande et affiche les informations d'un professeur.
+		function afficherInfoProfAjaxCallback() {
+			// La requête AJAX est-elle complétée (readyState=4) ?
+			if ( xhr.readyState == 4 ) {
+				// Masquage de la section indiquant le chargement en cours.
+				$('chargement').style.visibility = 'hidden';
+				// Réactivation des contrôles du formulaire.
+				$('surnom').disabled = false;
+				$('bth-afficher-info').disabled = false;
+
+				// La requête AJAX est-elle complétée avec succès (status=200) ?
+				if ( xhr.status != 200 ) {
+					// Affichage du message d'erreur.
+					var msgErreur = 'Erreur (code=' + xhr.status + '): La requête HTTP n\'a pu être complétée.';
+					$('msg-erreur').textContent = msgErreur;
+					
+				} else {
+					// Création de l'objet JavaScript à partir de l'expression JSON.
+					// *** Notez l'utilisation de "responseText".
+					try { 
+						objPersonne = JSON.parse( xhr.responseText );
+					} catch (e) {
+						alert('ERREUR: La réponse AJAX n\'est pas une expression JSON valide.');
+						// Fin de la fonction.
+						return;
+					}
+
+					// Y a-t-il eu une erreur côté serveur ?
+					if ( objPersonne.erreur ) {
+						// Affichage du message d'erreur.
+						var msgErreur = 'Erreur: ' + objPersonne.erreur.message;
+						$('msg-erreur').textContent = msgErreur;
+						
+					} else {
+						// Récupération et ajout du prénom au document HMTL.
+						$('prenom').textContent = objPersonne.prenom;
+						
+						// Récupération et ajout du nom au document HMTL.
+						$('nom').textContent = objPersonne.nom;
+						
+						// Récupération et ajout du téléphone au document HMTL.
+						$('telephone').textContent = objPersonne.telephone;
+						
+						// Récupération et ajout du bureau au document HMTL.
+						$('bureau').textContent = objPersonne.bureau;
+						
+						// Récupération et ajout du courriel au document HMTL.
+						$('courriel').textContent = objPersonne.courriel;
+					}
+				}
+			}
+		}  // Fin de "afficherInfoProfAjaxCallback" 
+		
+		// Fonction retirant les informations dynamiques de l'interface.
+		function retirerInfo() {
+			// On efface le message d'erreur.
+			$('msg-erreur').textContent = '';
+			// On efface les informations du professeur précédent.
+			$('prenom').textContent = '';
+			$('nom').textContent = '';
+			$('telephone').textContent = '';
+			$('bureau').textContent = '';
+			$('courriel').textContent = '';
+		}
+
+	</script>
+</head>
+
+<body>
+	<h1>Exemple JavaScript : AJAX avec BD et réponse JSON (POST)</h1>
+	
+	<div>
+		<p id="msg-erreur"></p>
+		
+		<!--
+			À noter que le fichier "serveur-post.php" qui n'existe pas présentement
+			pourrait correspondre à une version standard (sans AJAX) de réponse
+			à la requête HTTP par soumission du formulaire.  Ceci est nécessaire
+			lorsque l'application doit aussi être fonctionnelle sans JavaScript.
+		-->
+		<form method="post" action="serveur-post.php" id="form-prof">
+			<p>
+				<label for="surnom">Surnom du professeur:</label>
+				<input type="input" name="surnom" id="surnom" />
+			</p>
+			<p>
+				<input type="submit" value="Afficher informations" id="bth-afficher-info" />
+			</p>
+			<p id="chargement">
+				<img src="images/chargement.gif" id="img-chargement-ajax" />
+				Chargement en cours ...
+			</p>
+		</form>
+	</div>
+
+	<div id="info-prof">
+		<p>Prénom: <span id="prenom"></span></p>
+		<p>Nom: <span id="nom"></span></p>
+		<p>Téléphone: <span id="telephone"></span></p>
+		<p>Bureau: <span id="bureau"></span></p>
+		<p>Courriel: <span id="courriel"></span></p>
+	</div>
+	
+</body>
+</html>

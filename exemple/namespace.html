@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+<!-- 
+Toutes les fonctions et variables que vous devez créer en JavaScript doivent appartenir à l’espace 
+de  noms  «  com.dinfogarneau.cours526 ». Avant de créer ces espaces et sous-espaces  de noms, 
+vous devez vous assurez qu’ils n’existent pas déjà. Vous ne devez rien ajouter directement à l’objet 
+par défaut soit « window » outre « com » s’il n’est pas déjà présent.
+
+Vous  devez  minimiser  le  nombre  de  variables  globales  dans  l’espace  de  noms 
+« com.dinfogarneau.cours526  ».   De  plus,  ces  variables  globales  (à  défaut  de  pouvoir  être 
+déclarées),  devront  être  initialisées  à  « null »  et  avoir  un  commentaire  qui  explique  clairement 
+leur rôle, et ce, au début du fichier où elles sont nécessaires.
+-->
+
+<!-- Syntaxe: HTML5 Polyglot, Conformité: HTML5 et XML (XHTML5) -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+	<meta charset="utf-8" />
+	<title>Exemple JavaScript : Espace de noms (namespace)</title>
+	
+	<!-- Note : Pour éviter d'avoir plusieurs fichiers pour un exemple, le code JavaScript
+		 est directement inclus dans cette page HMTL; il est important de rappeler qu'on
+		 doit toujours mettre le code JavaScript dans un fichier séparé avec l'extension ".js"
+		 et placer ce fichier dans le sous-dossier "js". -->
+	<script>
+		// Vérification de l'existence de l'espace de noms "monProjet".
+		if ( typeof monProjet == 'undefined' )
+			var monProjet = {};  // Création de l'espace de noms "monProjet".
+
+		// Ajout d'une propriété à l'espace de noms "monProjet".
+		monProjet.nbEmployes = 148;
+		
+		// Ajout d'une fonction  à l'espace de noms "monProjet".
+		monProjet.saluer = function () {
+				alert('Bonjour tout le monde !');
+		};
+
+		// Vérification de l'existence de l'espace de noms "com".
+		if ( typeof com == 'undefined' )
+			var com = {};  // Création de l'espace de noms "com".
+			
+		// Vérification de l'existence du sous-espace de noms "com.dinfogarneau".
+		if ( typeof com.dinfogarneau == 'undefined' )
+			com.dinfogarneau = {};  // Création du sous-espace de noms "com.dinfogarneau".
+		
+		// Ajout d'une fonction  à l'espace de noms "com.dinfogarneau".
+		com.dinfogarneau.sePresenter = function () {
+				alert('Je suis le département d\'informatique à Garneau !');
+		}
+	</script>
+</head>
+
+<body>
+
+	<h1>Exemple JavaScript : Espace de noms (namespace)</h1>
+	
+	<!-- Script "inline" pour fins de démonstration uniquement; à ne pas faire. -->
+	<script>
+	
+		monProjet.saluer();
+		alert('Nb d\'employé dans ma compagnie = ' + monProjet.nbEmployes);
+		com.dinfogarneau.sePresenter();
+
+		document.write('<p>monProjet : ' + monProjet + '</p>');
+		document.write('<p>com.dinfogarneau : ' + com.dinfogarneau + '</p>');
+
+	</script>
+	
+</body>
+</html>
