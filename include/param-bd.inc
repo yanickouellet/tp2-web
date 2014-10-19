@@ -2,7 +2,7 @@
 // Paramètres de connexion à la base de données MySQL
 // ==================================================
 // Serveur.
-$dbHote = "localhost";
+$dbHote = "127.0.0.1";
 // Base de données.
 $dbNom = "web_tp2";
 // Nom d'utilisateur.

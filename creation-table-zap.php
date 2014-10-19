@@ -52,7 +52,7 @@ foreach($xml->Document->Folder->Placemark as $child)
     if (isset($child->Point)){
         $childInfo = $child->ExtendedData->SchemaData->SimpleData;
         $childCoord = explode(',',$child->Point->coordinates);
-        $noCivique = '';
+        $noCivique = null;
         if ($childInfo[1] == 0){
             $noCivique = null;
         }else{
