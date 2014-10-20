@@ -32,7 +32,7 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     context.controleurChargement("dom");
 
     util.$('configuration').parentNode.addEventListener('click', function() {
-      var config = $('panneau-config');
+      var config = util.$('panneau-config');
       if (config.style.visibility=="hidden" || config.style.visibility==""){
         config.style.visibility="visible";
       } else {

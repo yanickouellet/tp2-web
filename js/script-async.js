@@ -14,6 +14,12 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     context.initCarte();
   };
 
+  context.postInit = function() {
+	context.afficherReperesCarte();
+    context.genererInterfaceHtml();
+	context.afficherArrondissement();
+  }
+  
   context.initCarte = function() {
     // Utilisation de la position par défaut.
     var positionInit = new google.maps.LatLng(46.7936854,-71.2625485);
@@ -35,8 +41,7 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     if ( typeof navigator.geolocation != "undefined" ) {
       navigator.geolocation.getCurrentPosition(context.getCurrentPositionSuccess, context.getCurrentPositionError, {});
     } else {
-      context.afficherReperesCarte();
-      context.genererInterfaceHtml();
+      context.postInit();
     }
   };
 
@@ -46,16 +51,14 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     var icon = { url: 'images/male.png' };
     var repere = new google.maps.Marker( {"position": context.positionGeoloc, "map": context.carte, "icon": icon} );
     context.carte.setCenter(context.positionGeoloc);
-    context.afficherReperesCarte();
-    context.genererInterfaceHtml();
+    context.postInit();
   };
 
   // Fonction appelée lors de l'échec (refus ou problème) de la récupération de la position.
   context.getCurrentPositionError = function(erreur) {
     var positionInit = new google.maps.LatLng(46.7936854,-71.2625485);
     carte.setCenter(positionInit);
-    afficherReperesCarte();
-    genererInterfaceHtml();
+    context.postInit();
   };
 
   // Fonction responsable d'afficher les repères sur la carte.
@@ -126,5 +129,9 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
       '</div>'
 
     return contenu;
+  };
+  
+  context.afficherArrondissement = function() {
+	context.arrondissement[0].setMap(context.carte);
   };
 })(com.dinfogarneau.cours526, com.dinfogarneau.cours526.util);
