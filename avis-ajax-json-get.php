@@ -24,7 +24,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $zapId = $_GET['id'];
 
 try {
-    $req = "SELECT * FROM ZAP z LEFT JOIN Avis a ON a.idZap = z.id WHERE z.id = :id";
+    $req = "SELECT * FROM Avis a WHERE  a.idZap = :id";
     $statement = $connBD->prepare($req);
     $statement->execute(array('id' => $zapId));
     $statement->setFetchMode(PDO::FETCH_OBJ);
@@ -32,17 +32,7 @@ try {
     envoyer_erreur("Erreur lors du retrait des données");
 }
 
-$zap = new stdClass();
-$ligne = $statement->fetch();
-if(!$ligne)
-    envoyer_erreur("La zap n'existe pas.", 404);
-
-foreach(["id", "arrondissement", "noCivique", "batiment", "rue", "longitude", "latitude"] as $attribut)
-    $zap->$attribut = $ligne->$attribut;
-$zap->avis = [];
-
-if($ligne->avis)
-    $zap->avis[] = $ligne->avis;
+$avis = [];
 
 while($ligne = $statement->fetch()) {
     $zap->avis[] = $ligne->avis;
