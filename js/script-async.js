@@ -15,10 +15,10 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
   };
 
   context.postInit = function() {
-	context.afficherReperesCarte();
+	  context.afficherReperesCarte();
     context.genererInterfaceHtml();
-	context.afficherArrondissement();
-  }
+    context.initArrondissements();
+  };
   
   context.initCarte = function() {
     // Utilisation de la position par défaut.
@@ -148,9 +148,5 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     contenu.appendChild(form);
 
     return contenu;
-  };
-  
-  context.afficherArrondissement = function() {
-	context.arrondissement[0].setMap(context.carte);
   };
 })(com.dinfogarneau.cours526, com.dinfogarneau.cours526.util);
