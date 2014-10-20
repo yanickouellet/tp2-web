@@ -34,3 +34,15 @@ body {
 .succes {
     color: green;
 }
+
+#info-window {
+    background-color: #d3d3d3;
+    border-radius: 10px;
+    padding: 9px;
+    border: solid black 2px;
+}
+
+#info-window h2 {
+    margin-top: 0px;
+    border-bottom: solid black 2px;
+}
