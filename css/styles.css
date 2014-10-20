@@ -30,3 +30,7 @@ body {
     visibility: hidden;
     border: solid black 3px;
 }
+
+.succes {
+    color: green;
+}

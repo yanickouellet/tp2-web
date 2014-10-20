@@ -24,7 +24,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $zapId = $_GET['id'];
 
 try {
-    $req = "SELECT * FROM Avis a WHERE  a.idZap = :id";
+    $req = "SELECT * FROM Avis a WHERE  a.idZap = :id ORDER BY a.id DESC LIMIT 3";
     $statement = $connBD->prepare($req);
     $statement->execute(array('id' => $zapId));
     $statement->setFetchMode(PDO::FETCH_OBJ);
@@ -32,19 +32,17 @@ try {
     envoyer_erreur("Erreur lors du retrait des données");
 }
 
-$avis = [];
+$avis = new stdClass();
+$avis->avis = [];
 
 while($ligne = $statement->fetch()) {
-    $zap->avis[] = $ligne->avis;
+    $avis->avis[] = $ligne->avis;
 }
 
 $statement->closeCursor();
 
 $connBD = null;
 
-if (!$zap)
-    envoyer_erreur("La zap n'existe pas.", 404);
-
 sleep(2);
 
-echo json_encode($zap);
+echo json_encode($avis);

@@ -25,20 +25,32 @@ if (typeof com.dinfogarneau.cours526.util == "undefined") com.dinfogarneau.cours
     document.documentElement.firstChild.appendChild(script);
   };
 
-  util.ajax = function(url, callback, callbackErreur, data, estXml) {
+  util.ajax = function(url, callback, callbackErreur, data) {
+    if(typeof data == 'undefined')
+      data = null;
     var xhr = new XMLHttpRequest();
-    xhr.open(typeof data == 'object' ? 'POST' : 'GET', url, false);
-    xhr.send(typeof data == 'undefined' ? null : data);
 
-    // Le code de retour d'une requête XHR est 200 (OK) si tout s'est bien déroulé.
-    if ( xhr.status != 200 )
-      callbackErreur(xhr.response, xhr.status);
-    else {
-      if(xhr.responseXML != null)
-        callback(xhr.responseXML.documentElement);
-      else
-        callback(xhr.response);
-    }
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState != 4) return;
+      if ( xhr.status != 200 )
+        callbackErreur(xhr.response, xhr.status);
+      else {
+        if(xhr.responseXML != null)
+          callback(xhr.responseXML.documentElement);
+        else
+          callback(xhr.response);
+      }
+    };
+
+    xhr.open(data != null ? 'POST' : 'GET', url, true);
+    if(data != null) {
+      xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      var uri = '';
+      for(var cle in data)
+        uri += cle + '=' + encodeURIComponent(data[cle]) + '&';
+      xhr.send(uri);
+    } else
+      xhr.send(null);
   };
 
   util.foreach = function(tableau, callback) {

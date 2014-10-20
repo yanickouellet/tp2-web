@@ -82,8 +82,9 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
             zap.avis = JSON.parse(data).avis;
             context.afficherInfoWindow(zap, repere);
           });
+        } else {
+          context.afficherInfoWindow(zap, repere);
         }
-        context.afficherInfoWindow(zap, repere);
       });
     });
   };
@@ -132,6 +133,7 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     contenu.appendChild(avis);
 
     var form = document.createElement('form');
+    form.action = "#";
     var inputAvis = document.createElement('input');
     inputAvis.type = 'text';
     inputAvis.id = 'avis';
@@ -143,6 +145,29 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     form.appendChild(submit);
 
     contenu.appendChild(form);
+
+    submit.addEventListener('click', function(e){
+      e.preventDefault();
+      util.ajax('ajout-avis.php',
+        function(data){
+          var nouvelAvis = JSON.parse(data);
+          var li = document.createElement('li');
+          li.appendChild(document.createTextNode(nouvelAvis.avis));
+          avis.insertBefore(li, avis.childNodes[0]);
+          zap.avis.push(nouvelAvis);
+          
+          li.className = "success";
+          setTimeout(function(){ li.className = "";}, 2000);
+
+        },
+        function(data) {
+          var erreur = JSON.parse(data);
+          alert(erreur.message);
+        }, {
+        "id": zap.id,
+        "avis": inputAvis.value
+      })
+    }, false);
 
     return contenu;
   };
