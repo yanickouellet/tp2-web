@@ -152,6 +152,9 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
 
     submit.addEventListener('click', function(e){
       e.preventDefault();
+      if(inputAvis.value.trim() == '')
+        return;
+
       util.ajax('ajout-avis.php',
         function(data){
           var nouvelAvis = JSON.parse(data);
@@ -159,8 +162,9 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
           li.appendChild(document.createTextNode(nouvelAvis.avis));
           avis.insertBefore(li, avis.childNodes[0]);
           zap.avis.unshift(nouvelAvis.avis);
-          
-          li.className = "success";
+
+          inputAvis.value = '';
+          li.className = "succes";
           setTimeout(function(){ li.className = "";}, 2000);
 
         },
