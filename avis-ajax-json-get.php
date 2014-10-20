@@ -24,7 +24,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $zapId = $_GET['id'];
 
 try {
-    $req = "SELECT * FROM ZAP z INNER JOIN Avis a ON a.idZap = z.id WHERE z.id = :id";
+    $req = "SELECT * FROM ZAP z LEFT JOIN Avis a ON a.idZap = z.id WHERE z.id = :id";
     $statement = $connBD->prepare($req);
     $statement->execute(array('id' => $zapId));
     $statement->setFetchMode(PDO::FETCH_OBJ);
@@ -40,6 +40,9 @@ if(!$ligne)
 foreach(["id", "arrondissement", "noCivique", "batiment", "rue", "longitude", "latitude"] as $attribut)
     $zap->$attribut = $ligne->$attribut;
 $zap->avis = [];
+
+if($ligne->avis)
+    $zap->avis[] = $ligne->avis;
 
 while($ligne = $statement->fetch()) {
     $zap->avis[] = $ligne->avis;

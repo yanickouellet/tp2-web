@@ -8,18 +8,18 @@ try {
 }
 
 $req[] = 'CREATE TABLE IF NOT EXISTS ZAP (
-            id int,
+            id int(11) NOT NULL AUTO_INCREMENT,
             arrondissement VARCHAR(255),
             noCivique int,
             batiment VARCHAR(255),
             rue VARCHAR(255),
             longitude DECIMAL(15,13),
             latitude DECIMAL(15,13),
-            CONSTRAINT pk_id PRIMARY KEY (id)
-          )';
+            PRIMARY KEY (id)
+          ) ENGINE=InnoDB';
 
 $req[] = 'CREATE TABLE IF NOT EXISTS Avis (
-            id int,
+            id int(11) NOT NULL AUTO_INCREMENT,
             avis TEXT,
             idZap int,
             CONSTRAINT pk_id PRIMARY KEY (id),
@@ -36,7 +36,7 @@ foreach ($req as $value) {
 		$prepReqProf = $connBD -> prepare($reqProf);
 		$prepReqProf -> execute();
 	} catch (PDOException $e) {
-		exit( "Erreur lors de l'exécution de la requête SQL :<br />\n" .  $e -> postMessage() . "<br />\nREQUÊTE = " . $reqProf );
+		exit( "Erreur lors de l'exécution de la requête SQL :<br />\n" .  $e -> getMessage() . "<br />\nREQUÊTE = " . $reqProf );
 	}
 }
 
@@ -69,7 +69,7 @@ foreach($xml->Document->Folder->Placemark as $child)
                 "latitude" => $childCoord[1]));
             $i += 1;
         } catch (PDOException $e) {
-            exit( "Erreur lors de l'exécution de la requête SQL :<br />\n" .  $e -> postMessage() . "<br />\nREQUÊTE = " . $reqProf );
+            exit( "Erreur lors de l'exécution de la requête SQL :<br />\n" .  $e -> getMessage() . "<br />\nREQUÊTE = " . $reqProf );
         }
     }
 }
@@ -79,5 +79,5 @@ try {
     $prepReqProf = $connBD -> prepare($reqProf);
     $prepReqProf -> execute();
 } catch (PDOException $e) {
-    exit( "Erreur lors de l'exécution de la requête SQL :<br />\n" .  $e -> postMessage() . "<br />\nREQUÊTE = " . $reqProf );
+    exit( "Erreur lors de l'exécution de la requête SQL :<br />\n" .  $e -> getMessage() . "<br />\nREQUÊTE = " . $reqProf );
 }

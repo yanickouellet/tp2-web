@@ -4,18 +4,17 @@ if (typeof com == "undefined") var com = {};
 if (typeof com.dinfogarneau == "undefined") com.dinfogarneau = {};
 if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 = {};
 
-(function(context){
+(function(context, util){
   // Carte
-  var carte = null;
-  var infoWindow = null;
+  context.carte = null;
+  context.infoWindow = null;
+  context.positionGeoloc = null;
 
   context.init = function() {
-    initCarte();
-    afficherReperesCarte();
-    genererInterfaceHtml();
-  }
+    context.initCarte();
+  };
 
-  function initCarte() {
+  context.initCarte = function() {
     // Utilisation de la position par défaut.
     var positionInit = new google.maps.LatLng(46.7936854,-71.2625485);
 
@@ -30,54 +29,102 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
       }
     };
 
-    carte = new google.maps.Map(document.getElementById("carte-canvas"), optionsCarte);
+    context.carte = new google.maps.Map(document.getElementById("carte-canvas"), optionsCarte);
 
     // Est-ce que le navigateur supporte la géolocalisation ?
     if ( typeof navigator.geolocation != "undefined" ) {
-      console.log('Le navigateur supporte la géolocalisation.');
-      navigator.geolocation.getCurrentPosition(getCurrentPositionSuccess, getCurrentPositionError, {});
+      navigator.geolocation.getCurrentPosition(context.getCurrentPositionSuccess, context.getCurrentPositionError, {});
     } else {
-      console.log('Le navigateur NE supporte PAS la géolocalisation.');
+      context.afficherReperesCarte();
+      context.genererInterfaceHtml();
     }
-  }  // Fin de la fonction "initCarte"
+  };
 
   // Fonction appelée lors du succès de la récupération de la position.
-  function getCurrentPositionSuccess (position) {
-    // Utilisation de la position de l'utilisateur.
-    console.log('Position obtenue : ' + position.coords.latitude + ', ' + position.coords.longitude);
-    var positionInit = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-    var icon = { url: 'http://goo.gl/Tfv9Al' };
-    var repere = new google.maps.Marker( {"position": positionInit, "map": carte, "icon": icon} );
-    carte.setCenter(positionInit);
-  }
+  context.getCurrentPositionSuccess = function(position) {
+    context.positionGeoloc = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    var icon = { url: 'images/male.png' };
+    var repere = new google.maps.Marker( {"position": context.positionGeoloc, "map": context.carte, "icon": icon} );
+    context.carte.setCenter(context.positionGeoloc);
+    context.afficherReperesCarte();
+    context.genererInterfaceHtml();
+  };
 
   // Fonction appelée lors de l'échec (refus ou problème) de la récupération de la position.
-  function getCurrentPositionError(erreur) {
-    console.log('Utilisation de la position par défaut.');
+  context.getCurrentPositionError = function(erreur) {
     var positionInit = new google.maps.LatLng(46.7936854,-71.2625485);
     carte.setCenter(positionInit);
-  }
+    afficherReperesCarte();
+    genererInterfaceHtml();
+  };
 
   // Fonction responsable d'afficher les repères sur la carte.
-  function afficherReperesCarte() {
+  context.afficherReperesCarte = function() {
     var zaps = context.zap;
-    foreach(zaps, function(zap){
+
+    util.foreach(zaps, function(zap){
+      var position = new google.maps.LatLng(zap.latitude, zap.longitude);
+      var icone = 'images/logo-wifij.svg';
+      if(context.positionGeoloc != null) {
+        var distance = google.maps.geometry.spherical.computeDistanceBetween(context.positionGeoloc, position);
+        if(distance <= 5000)
+          icone = 'images/logo-wifiv.svg';
+      }
+
       var repere = new google.maps.Marker({
-        position: new google.maps.LatLng(zap.latitude, zap.longitude),
-        icon: { url: 'images/logo-wifiv.svg'},
-        map: carte
-        });
+        position: position,
+        icon: icone,
+        map: context.carte
+      });
+      google.maps.event.addListener(repere, 'click', function() {
+        if(typeof zap.details == "undefined") {
+          util.ajax('avis-ajax-json-get.php?id=' + zap.id, function(details) {
+            zap.details = JSON.parse(details);
+            context.afficherInfoWindow(zap.details, repere);
+          });
+        }
+        context.afficherInfoWindow(zap.details, repere);
+      });
     });
-  }
+  };
 
   // Fonction responsable de générer l'interface graphique HTML.
-  function genererInterfaceHtml() {
-    var config = $('panneau-config');
+  context.genererInterfaceHtml =  function() {
+    var config = util.$('panneau-config');
 
     var kmlLayer = new google.maps.KmlLayer({
       url: 'http://web.yanickouellet.com/rtc-trajets.kml',
       suppressInfoWindows: true
      // map: carte
     });
-  }
-})(com.dinfogarneau.cours526);
+  };
+
+  context.afficherInfoWindow = function(zap, repere) {
+    if(context.infoWindow == null)
+      context.infoWindow = new google.maps.InfoWindow();
+    context.infoWindow.setContent(context.genererHtmlInfoWindow(zap));
+    context.infoWindow.close();
+    context.infoWindow.open(context.carte, repere);
+  };
+
+  context.genererHtmlInfoWindow = function(zap) {
+    var avis = '<ul>';
+    for(var i = 0; i < zap.avis.length; i++)
+    {
+      avis += '<li>' + zap.avis[i] + '</li>';
+    }
+
+    var contenu =
+      '<div id="info-window">' +
+        '<h2>' + zap.batiment + '</h2>' +
+        '<p>' + zap.noCivique + ' ' + zap.rue + ', ' + zap.arrondissement + '</p>' +
+        '<h2>Avis</h2>' + avis +
+        '<form>' +
+        ' <input type="text" id="avis"" />' +
+        ' <input type="submit" value="Envoyer"/>' +
+        '</form>' +
+      '</div>'
+
+    return contenu;
+  };
+})(com.dinfogarneau.cours526, com.dinfogarneau.cours526.util);

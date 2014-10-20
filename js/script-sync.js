@@ -4,7 +4,7 @@ if (typeof com == "undefined") var com = {};
 if (typeof com.dinfogarneau == "undefined") com.dinfogarneau = {};
 if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 = {};
 
-(function(context){
+(function(context, util){
   context.zap = null;
   var elementsCharges = {
     "dom": false,
@@ -14,9 +14,7 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     "script-async": false
   };
 
-  function controleurChargement(nouvElemCharge) {
-    console.log('controleurChargement: Nouvel élément chargé "' + nouvElemCharge + '".');
-
+  context.controleurChargement = function(nouvElemCharge) {
     if (typeof elementsCharges[nouvElemCharge] != "undefined") {
       elementsCharges[nouvElemCharge] = true;
       var tousCharge = true;
@@ -25,17 +23,15 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
           tousCharge = false;
       }
       if (tousCharge) {
-        console.log('controleurChargement: Tous les éléments ont été chargés.');
         context.init();
       }
     }
-  }
+  };
 
   window.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM chargé.');
-    controleurChargement("dom");
+    context.controleurChargement("dom");
 
-    $('configuration').parentNode.addEventListener('click', function() {
+    util.$('configuration').parentNode.addEventListener('click', function() {
       var config = $('panneau-config');
       if (config.style.visibility=="hidden" || config.style.visibility==""){
         config.style.visibility="visible";
@@ -44,25 +40,28 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
       }
     }, false);
 
-    chargerScriptAsync('https://maps.googleapis.com/maps/api/js?sensor=true&callback=apiGoogleMapCharge', null);
+    util.chargerScriptAsync('https://maps.googleapis.com/maps/api/js?sensor=true&libraries=geometry&callback=com.dinfogarneau.cours526.apiGoogleMapCharge', null);
   }, false);
 
-  chargerScriptAsync('js/script-async.js', function(){
-    controleurChargement("script-async");
+  util.chargerScriptAsync('js/script-async.js', function(){
+    context.controleurChargement("script-async");
   });
 
 // Chargement asynchrone des arrondissements.
-  chargerScriptAsync('js/arrondissements.js', function () {
-    controleurChargement("arrondissements");
+  util.chargerScriptAsync('js/arrondissements.js', function () {
+    context.controleurChargement("arrondissements");
   });
 
-// Fonction appelée pour indiquer que l'API Google Map est chargé.
-  window.apiGoogleMapCharge = function() {
-    controleurChargement("api-google-map");
+// Fonction appelÃ©e pour indiquer que l'API Google Map est chargÃ©.
+  context.apiGoogleMapCharge = function() {
+    context.controleurChargement("api-google-map");
   };
 
-  ajax('zap-ajax-json-get.php', function(zap){
+  util.ajax('zap-ajax-json-get.php', function(zap){
     context.zap = JSON.parse(zap);
-    controleurChargement("zap");
-  });
-})(com.dinfogarneau.cours526);
+    context.controleurChargement("zap");
+  },function(message){
+      alert(message);
+    }
+  );
+})(com.dinfogarneau.cours526, com.dinfogarneau.cours526.util);
