@@ -9,19 +9,16 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
   context.arrondissements = null;
 
   context.parsePolygone = function(geo) {
-    var coordsGoogle = [];
-    var polygones = geo.match(/\([^\(\)]+\)/g);
-    if (polygones !== null){
-      for (var i = 0; i < polygones.length; i++){
-        var coordonnees = polygones[i].match(/-?\d+\.?\d*/g);
-        if (coordonnees !== null){
-          for (var j = 0; j < coordonnees.length; j+=2){
-            coordsGoogle.push(new google.maps.LatLng(Number(coordonnees[j+1]), Number(coordonnees[j])));
-          }
-        }
+    var polygones = [];
+    var stringPolygones = geo.match(/\([^\(\)]+\)/g);
+    for (var i = 0; stringPolygones != null && i < stringPolygones.length; i++){
+      var coordonnees = stringPolygones[i].match(/-?\d+\.?\d*/g);
+      polygones.push([]);
+      for (var j = 0; coordonnees != null && j < coordonnees.length; j+=2){
+        polygones[i].push(new google.maps.LatLng(Number(coordonnees[j+1]), Number(coordonnees[j])));
       }
     }
-    return coordsGoogle;
+    return polygones;
   };
 
   context.initArrondissements = function() {

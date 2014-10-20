@@ -119,7 +119,8 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     contenu.appendChild(titre);
 
     var adresse = document.createElement('p');
-    adresse.appendChild(document.createTextNode(zap.noCivique + ' ' + zap.rue + ', ' + zap.arrondissement ));
+    adresse.appendChild(document.createTextNode((zap.noCivique != null ? zap.noCivique : '') + ' '
+      + (zap.rue != null ? zap.rue : '') + ', ' + (zap.arrondissement != null ? zap.arrondissement : '') ));
     contenu.appendChild(adresse);
 
     var avis = document.createElement('ul');
@@ -157,7 +158,7 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
           var li = document.createElement('li');
           li.appendChild(document.createTextNode(nouvelAvis.avis));
           avis.insertBefore(li, avis.childNodes[0]);
-          zap.avis.push(nouvelAvis);
+          zap.avis.unshift(nouvelAvis.avis);
           
           li.className = "success";
           setTimeout(function(){ li.className = "";}, 2000);
