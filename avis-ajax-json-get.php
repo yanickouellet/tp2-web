@@ -1,101 +1,57 @@
 <?php
 
-/*
-Les avis sur les ZAP ne doivent pas être transmises  à ce moment mais seulement  lorsque  le 
-repère associé à une ZAP sur la carte sera cliqué.
-S’il y a erreur  (connexion à la BD, requête SQL, etc.),  le format  doit aussi être  JSON pour 
-transmettre le message d’erreur.
-Lorsqu’un repère ZAP est cliqué  sur la carte,  les avis  concernant seulement  cette ZAP  doivent 
-être  extraits  en  AJAX  (asynchrone)  avec  une  requête  GET  au  format  JSON.  De  plus,  ces  avis 
-doivent être conservés pour éviter de refaire la même requête si le repère est cliqué à nouveau.
-*/
+require("include/util.php");
 
-// Retourne du contenu en format JSON.
 header("Content-type: application/json; charset=utf-8");
 
-// Force l'expiration immédiate de la page au niveau du navigateur Web; elle n'est pas conservée en cache.
 header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 header("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 header("Pragma: no-cache");
 
 
-
-
-
-
-// EXEMPLE
-
-// Message d'erreur.
-$msgErreur = null;
-// Est-ce que le paramètre "surnom" a été fourni ?
-if ( ! isset($_POST["surnom"]) )
-	$msgErreur = "Le paramètre \"surnom\" n'a pas été fourni avec la requête.";
-else
-{
-	// Paramètres de connexion à la BD.
-	require("include/param-bd.inc");
-	// Création d'une connexion à la BD.
-	try {
-		$connBD = new PDO("mysql:host=$dbHote; dbname=$dbNom", $dbUtilisateur, $dbMotPasse, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
-		// Pour lancer les exceptions lorsqu'il y des erreurs PDO.
-		$connBD -> setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-	} catch (PDOException $e) {
-		exit( "Erreur lors de la connexion à la BD :<br />\n" .  $e->postMessage() );
-	}
-
-	// Surnom du professeur.
-	$surnomProf = $_POST["surnom"];
-
-	try {
-		// Préparation et exécution de la requête SQL permettant d'obtenir l'information sur le professeur.
-		$reqProf = "SELECT * FROM professeurs WHERE ProfSurnom=:surnomProf";
-		$prepReqProf = $connBD -> prepare($reqProf);
-		$prepReqProf -> execute( array( "surnomProf" => $surnomProf) );
-		// Retourne chaque ligne de données dans un objet (sans classe).
-		$prepReqProf -> setFetchMode(PDO::FETCH_OBJ);
-	} catch (PDOException $e) {
-		exit( "Erreur lors de l'exécution de la requête SQL :<br />\n" .  $e -> postMessage() . "<br />\nREQUÊTE = " . $reqProf );
-	}
-
-	// Est-ce que le surnom du professeur est valide ?
-	if ( !( $infoProf = $prepReqProf -> fetch() ) )
-		$msgErreur = "Le surnom du professeur n'existe pas.";
-	else
-	{
-		// Récupération des informations sur le professeur.
-		$profPrenom = $infoProf -> ProfPrenom;
-		$profNom = $infoProf -> ProfNom;
-		$profTel = $infoProf -> ProfTelephone;
-		$profBureau = $infoProf -> ProfBureau;
-		$profCourriel = $infoProf -> ProfCourriel;
-		
-		// Production de l'expression JSON à retourner.
-		echo "{\n";
-			echo "\t\"prenom\": \"$profPrenom\",\n";
-			echo "\t\"nom\": \"$profNom\",\n";
-			echo "\t\"telephone\": \"$profTel\",\n";
-			echo "\t\"bureau\": \"$profBureau\",\n";
-			echo "\t\"courriel\": \"$profCourriel\"\n";
-		echo "}\n";	
-	}
-	// Libération du jeu de résultats.
-	$prepReqProf -> closeCursor();
-	// Fermeture de la connexion à la BD.
-	$connBD = null;
+require("include/param-bd.inc");
+try {
+    $connBD = new PDO("mysql:host=$dbHote; dbname=$dbNom", $dbUtilisateur, $dbMotPasse, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
+    $connBD -> setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+} catch (PDOException $e) {
+    envoyer_erreur("Erreur de connexion à la base de donnée.");
 }
 
-// S'il y erreur, on retourne un message d'erreur en format JSON.
-if ( $msgErreur != null )
-{
-		echo "{\n";
-		echo "\t\"erreur\":\n";
-		echo "\t{\n";
-			echo "\t\t\"message\": \"" . str_replace("\"", "\\\"", $msgErreur) . "\"\n";
-		echo "\t}\n";
-		echo "}\n";
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    envoyer_erreur("L'id de la ZAP doit être spécifié et être un nombre");
 }
 
-// Simulation d'un délai avant de fournir la réponse;
-// ceci permet de voir la zone indiquant le chargement AJAX et de réaliser que la requête HTTP est asynchrone.
+$zapId = $_GET['id'];
+
+try {
+    $req = "SELECT * FROM ZAP z INNER JOIN Avis a ON a.idZap = z.id WHERE z.id = :id";
+    $statement = $connBD->prepare($req);
+    $statement->execute(array('id' => $zapId));
+    $statement->setFetchMode(PDO::FETCH_OBJ);
+} catch (PDOException $e) {
+    envoyer_erreur("Erreur lors du retrait des données");
+}
+
+$zap = new stdClass();
+$ligne = $statement->fetch();
+if(!$ligne)
+    envoyer_erreur("La zap n'existe pas.", 404);
+
+foreach(["id", "arrondissement", "noCivique", "batiment", "rue", "longitude", "latitude"] as $attribut)
+    $zap->$attribut = $ligne->$attribut;
+$zap->avis = [];
+
+while($ligne = $statement->fetch()) {
+    $zap->avis[] = $ligne->avis;
+}
+
+$statement->closeCursor();
+
+$connBD = null;
+
+if (!$zap)
+    envoyer_erreur("La zap n'existe pas.", 404);
+
 sleep(2);
-?>
+
+echo json_encode($zap);

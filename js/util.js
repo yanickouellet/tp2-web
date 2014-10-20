@@ -27,3 +27,29 @@ function chargerScriptAsync(urlFichier, callbackFct) {
 	}
 	document.documentElement.firstChild.appendChild(script);
 }
+
+function ajax(url, callback, data) {
+  var erreur = false;
+
+  try  {
+    var xhr = new XMLHttpRequest();
+  } catch (e) {
+    throw new Error("La création de la requête xhr a échouée");
+  }
+
+  if ( ! erreur )
+  {
+    xhr.open(typeof data == 'object' ? 'POST' : 'GET', url, false);
+    xhr.send(null);
+
+    // Le code de retour d'une requête XHR est 200 (OK) si tout s'est bien déroulé.
+    if ( xhr.status != 200 )
+      throw new Error("La requête xhr a échouée avec le code " + xhr.status);
+    callback(xhr.response);
+  }
+}
+
+function foreach(tableau, callback) {
+  for(var i = 0; i < tableau.length; i++)
+    callback(tableau[i]);
+}
