@@ -19,22 +19,26 @@ if (typeof com.dinfogarneau.cours526.util == "undefined") com.dinfogarneau.cours
     script.src = urlFichier;
     script.async = true;
     // Fonction de callback (optionnel) après le chargement asynchrone du script.
-    if (typeof callbackFct == "function") {
+    if (typeof callbackFct == 'function') {
       script.addEventListener('load', callbackFct, false);
     }
     document.documentElement.firstChild.appendChild(script);
   };
 
-  util.ajax = function(url, callback, callbackErreur, data) {
+  util.ajax = function(url, callback, callbackErreur, data, estXml) {
     var xhr = new XMLHttpRequest();
     xhr.open(typeof data == 'object' ? 'POST' : 'GET', url, false);
-    xhr.send(null);
+    xhr.send(typeof data == 'undefined' ? null : data);
 
     // Le code de retour d'une requête XHR est 200 (OK) si tout s'est bien déroulé.
     if ( xhr.status != 200 )
       callbackErreur(xhr.response, xhr.status);
-    else
-      callback(xhr.response);
+    else {
+      if(xhr.responseXML != null)
+        callback(xhr.responseXML.documentElement);
+      else
+        callback(xhr.response);
+    }
   };
 
   util.foreach = function(tableau, callback) {

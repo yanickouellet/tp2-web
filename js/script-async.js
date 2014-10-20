@@ -80,13 +80,13 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
         map: context.carte
       });
       google.maps.event.addListener(repere, 'click', function() {
-        if(typeof zap.details == "undefined") {
-          util.ajax('avis-ajax-json-get.php?id=' + zap.id, function(details) {
-            zap.details = JSON.parse(details);
-            context.afficherInfoWindow(zap.details, repere);
+        if(typeof zap.avis == "undefined") {
+          util.ajax('avis-ajax-json-get.php?id=' + zap.id, function(data) {
+            zap.avis = JSON.parse(data).avis;
+            context.afficherInfoWindow(zap, repere);
           });
         }
-        context.afficherInfoWindow(zap.details, repere);
+        context.afficherInfoWindow(zap, repere);
       });
     });
   };
@@ -111,22 +111,41 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
   };
 
   context.genererHtmlInfoWindow = function(zap) {
-    var avis = '<ul>';
-    for(var i = 0; i < zap.avis.length; i++)
-    {
-      avis += '<li>' + zap.avis[i] + '</li>';
+    var contenu = document.createElement('div');
+    contenu.id = "info-window";
+    var titre = document.createElement('h2');
+    titre.appendChild(document.createTextNode(zap.batiment));
+    contenu.appendChild(titre);
+
+    var adresse = document.createElement('p');
+    adresse.appendChild(document.createTextNode(zap.noCivique + ' ' + zap.rue + ', ' + zap.arrondissement ));
+    contenu.appendChild(adresse);
+
+    var avis = document.createElement('ul');
+    for(var i = 0; i < zap.avis.length; i++) {
+      var elem = document.createElement('li');
+      elem.appendChild(document.createTextNode(zap.avis[i]));
+      avis.appendChild(elem);
     }
 
-    var contenu =
-      '<div id="info-window">' +
-        '<h2>' + zap.batiment + '</h2>' +
-        '<p>' + zap.noCivique + ' ' + zap.rue + ', ' + zap.arrondissement + '</p>' +
-        '<h2>Avis</h2>' + avis +
-        '<form>' +
-        ' <input type="text" id="avis"" />' +
-        ' <input type="submit" value="Envoyer"/>' +
-        '</form>' +
-      '</div>'
+    titre = document.createElement('h2');
+    titre.appendChild(document.createTextNode('Avis'));
+
+    contenu.appendChild(titre);
+    contenu.appendChild(avis);
+
+    var form = document.createElement('form');
+    var inputAvis = document.createElement('input');
+    inputAvis.type = 'text';
+    inputAvis.id = 'avis';
+    form.appendChild(inputAvis);
+
+    var submit = document.createElement('input');
+    submit.value = 'Envoyer';
+    submit.type = 'submit';
+    form.appendChild(submit);
+
+    contenu.appendChild(form);
 
     return contenu;
   };

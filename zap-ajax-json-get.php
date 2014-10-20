@@ -27,7 +27,7 @@ try {
 }
 
 try {
-    $req = "SELECT id, longitude, latitude FROM ZAP";
+    $req = "SELECT * FROM ZAP";
     $statement = $connBD->query($req);
     $statement -> setFetchMode(PDO::FETCH_OBJ);
 } catch (PDOException $e) {
