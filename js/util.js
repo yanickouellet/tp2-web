@@ -18,13 +18,19 @@ if (typeof com.dinfogarneau.cours526.util == "undefined") com.dinfogarneau.cours
     var script = document.createElement('script');
     script.src = urlFichier;
     script.async = true;
-    // Fonction de callback (optionnel) après le chargement asynchrone du script.
+    // Fonction de callback (optionnelle) après le chargement asynchrone du script.
     if (typeof callbackFct == 'function') {
       script.addEventListener('load', callbackFct, false);
     }
     document.documentElement.firstChild.appendChild(script);
   };
 
+
+  // Permet de gérer une requête ajax asynchrone. Si des données sont passées
+  // (paramètre data), la requête est de type post. Si la réponse est du xml, la racine
+  // du document est retournée. Le contenu de la réponse est passé à callback.
+  // S'il y a une erreur, le contenu de l'erreur et le code de la requête sont passés
+  // à callbackErreur à la place.
   util.ajax = function(url, callback, callbackErreur, data) {
     if(typeof data == 'undefined')
       data = null;
@@ -53,8 +59,11 @@ if (typeof com.dinfogarneau.cours526.util == "undefined") com.dinfogarneau.cours
       xhr.send(null);
   };
 
+  // Fonction foreach utilitaire permettant un léger sucre syntaxie
+  // en plus de profiter du nouveau scope créé par la closure. Très pratique :)
   util.foreach = function(tableau, callback) {
+    if(!tableau) return;
     for(var i = 0; i < tableau.length; i++)
-      callback(tableau[i]);
+      callback(tableau[i], i);
   };
 })(com.dinfogarneau.cours526.util);

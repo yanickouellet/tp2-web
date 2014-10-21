@@ -43,6 +43,4 @@ $statement->closeCursor();
 
 $connBD = null;
 
-sleep(2);
-
 echo json_encode($avis);

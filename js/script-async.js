@@ -5,22 +5,31 @@ if (typeof com.dinfogarneau == "undefined") com.dinfogarneau = {};
 if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 = {};
 
 (function(context, util){
-  // Carte
+  // Carte de l'application (google.maps.Map)
   context.carte = null;
+  // InfoWindow utilisée pour toutes les Zap
   context.infoWindow = null;
+  // Position géolocalisée de l'utilisateur (reste null s'il ne la partage pas)
   context.positionGeoloc = null;
+  // Layer kml pour les trajets du RTC
+  context.layerTrajets = null;
 
-  context.init = function() {
-    context.initCarte();
-  };
-
+  // Fonction exécuée après l'initialisation de la carte, chargeant tous les éléments sur la carte
   context.postInit = function() {
+    context.infoWindow = new google.maps.InfoWindow();
+    context.layerTrajets = new google.maps.KmlLayer({
+      url: 'http://web.yanickouellet.com/rtc-trajets.kml',
+      suppressInfoWindows: true
+    });
+
 	  context.afficherReperesCarte();
-    context.genererInterfaceHtml();
-    context.initArrondissements();
+    context.chargerArrondissements();
+    context.chargerMenu();
   };
-  
-  context.initCarte = function() {
+
+  // Fonction initialisant l'application, appelée par le controlleur de chargement
+  // lorsque toutes les ressources sont chargées
+  context.init = function() {
     // Utilisation de la position par défaut.
     var positionInit = new google.maps.LatLng(46.7936854,-71.2625485);
 
@@ -79,38 +88,43 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
         icon: icone,
         map: context.carte
       });
+      zap.repere = repere;
+
       google.maps.event.addListener(repere, 'click', function() {
-        if(typeof zap.avis == "undefined") {
-          util.ajax('avis-ajax-json-get.php?id=' + zap.id, function(data) {
-            zap.avis = JSON.parse(data).avis;
-            context.afficherInfoWindow(zap, repere);
-          });
-        } else {
-          context.afficherInfoWindow(zap, repere);
-        }
+        context.afficherInfoWindow(zap);
       });
     });
   };
 
-  // Fonction responsable de générer l'interface graphique HTML.
-  context.genererInterfaceHtml =  function() {
-    var config = util.$('panneau-config');
-
-    var kmlLayer = new google.maps.KmlLayer({
-      url: 'http://web.yanickouellet.com/rtc-trajets.kml',
-      suppressInfoWindows: true
-     // map: carte
-    });
-  };
-
-  context.afficherInfoWindow = function(zap, repere) {
-    if(context.infoWindow == null)
-      context.infoWindow = new google.maps.InfoWindow();
-    context.infoWindow.setContent(context.genererHtmlInfoWindow(zap));
+  // Affiche un InfoWindow et charge de facçon asynchrone les données sur un
+  // avis si nécessaire
+  context.afficherInfoWindow = function(zap) {
     context.infoWindow.close();
-    context.infoWindow.open(context.carte, repere);
+    if(typeof zap.avis == "undefined") {
+      util.ajax('avis.php?id=' + zap.id, function(data) {
+        zap.avis = JSON.parse(data).avis;
+        context.ouvrirInfoWindow(zap);
+      }, function(data) {
+        try{
+          alert(JSON.parse(data).message);
+        }
+        catch(e){
+          alert('Impossible d\'afficher les avis');
+        }
+      });
+    } else {
+      context.ouvrirInfoWindow(zap);
+    }
   };
 
+  // Permet d'ouvrir une infoWindow et de configurer son contenu
+  context.ouvrirInfoWindow = function(zap) {
+    context.infoWindow.setContent(context.genererHtmlInfoWindow(zap));
+    context.infoWindow.open(context.carte, zap.repere);
+  };
+
+  // Permet de générer le contenu d'une infoWindow et de gérer les événements appropriés
+  // pour l'envoie d'avis
   context.genererHtmlInfoWindow = function(zap) {
     var contenu = document.createElement('div');
     contenu.id = "info-window";
@@ -150,6 +164,8 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
 
     contenu.appendChild(form);
 
+
+    // Gestion des événements pour l'envoie de l'avis
     submit.addEventListener('click', function(e){
       e.preventDefault();
       if(inputAvis.value.trim() == '')
@@ -163,18 +179,23 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
           avis.insertBefore(li, avis.childNodes[0]);
           zap.avis.unshift(nouvelAvis.avis);
 
-          inputAvis.value = '';
           li.className = "succes";
-          setTimeout(function(){ li.className = "";}, 2000);
+          setTimeout(function(){ li.className = "";}, 4000);
 
         },
         function(data) {
-          var erreur = JSON.parse(data);
-          alert(erreur.message);
+          try{
+            alert(JSON.parse(data).message);
+          }
+          catch(e){
+            alert('Impossible d\'ajouter l\'avis');
+          }
         }, {
         "id": zap.id,
         "avis": inputAvis.value
-      })
+      });
+
+      inputAvis.value = '';
     }, false);
 
     return contenu;
