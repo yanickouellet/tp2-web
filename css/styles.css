@@ -30,8 +30,8 @@ body {
     border-radius: 20px;
     visibility: hidden;
     border: solid black 3px;
-    max-height: 80%;
     width: 400px;
+    max-height: 80%;
     overflow: auto;
 }
 
@@ -65,8 +65,19 @@ body {
 }
 
 @media only screen and (max-width: 480px) {
+    #panneau-config {
+        left: 3.5%;
+        width: 85%;
+    }
     #liste-zap li {
         width: 95%;
+    }
+}
+
+@media only screen and (max-height: 320px) {
+    #panneau-config {
+        top: 5px;
+        height: 300px;
     }
 }
 
