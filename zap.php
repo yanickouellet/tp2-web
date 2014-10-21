@@ -1,14 +1,5 @@
 <?php
 
-/*
-Vous  devez  écrire  un  script  PHP  qui  fournit  les  données  dans  un  format  JSON  de  votre 
-choix à partir de la base de données que vous avez construite. 
-Les avis sur les ZAP ne doivent pas être transmises  à ce moment mais seulement  lorsque  le 
-repère associé à une ZAP sur la carte sera cliqué.
-S’il y a erreur  (connexion à la BD, requête SQL, etc.),  le format  doit aussi être  JSON pour 
-transmettre le message d’erreur.
-*/
-
 require("include/util.php");
 
 header("Content-type: application/json; charset=utf-8");
@@ -42,7 +33,5 @@ while($ligne = $statement->fetch()) {
 $statement->closeCursor();
 
 $connBD = null;
-
-sleep(2);
 
 echo json_encode($zap);

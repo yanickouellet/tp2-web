@@ -5,21 +5,21 @@ if (typeof com.dinfogarneau == "undefined") com.dinfogarneau = {};
 if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 = {};
 
 (function(context){
-  // Liste des arrondissements (lorsque qu'initialisés, chacun aura la propriété "nom" et la propriété "polygone")
+  // Liste des arrondissements (lorsque qu'initialisÃ©s, chacun aura la propriÃ©tÃ© "nom" et la propriÃ©tÃ© "polygone")
   context.arrondissements = null;
 
-  // Parse les coordonnées au format Well-Known texte et retourne un vecteur de vecteurs de coordonnées
+  // Parse les coordonnÃ©es au format Well-Known texte et retourne un vecteur de vecteurs de coordonnÃ©es
   // que google maps utilisera pour dessiner comme un grand les polygones (qui sont en fait des multi-polygons)
   context.parsePolygone = function(geo) {
-    // Vecteur de vecteurs de coordonées. Chaque vecteur représente un polygone et chaque sous-vecteur contient
-    // les coordonnées nécessaires pour tracer ce polygone. Le résultat permet de tracer une géométrie complexe
+    // Vecteur de vecteurs de coordonÃ©es. Chaque vecteur reprÃ©sente un polygone et chaque sous-vecteur contient
+    // les coordonnÃ©es nÃ©cessaires pour tracer ce polygone. Le rÃ©sultat permet de tracer une gÃ©omÃ©trie complexe
     // de plusieurs polygones, dans ce cas, les arrondissements
     var polygones = [];
     var stringPolygones = geo.match(/\([^\(\)]+\)/g);
-    // Parcours les différents polygones
+    // Parcours les diffÃ©rents polygones
     for (var i = 0; stringPolygones != null && i < stringPolygones.length; i++){
       var coordonnees = stringPolygones[i].match(/-?\d+\.?\d*/g);
-      // Remplit les coordonnées d'un polygone
+      // Remplit les coordonnÃ©es d'un polygone
       var polygone = [];
       for (var j = 0; coordonnees != null && j < coordonnees.length; j+=2){
         polygone.push(new google.maps.LatLng(Number(coordonnees[j+1]), Number(coordonnees[j])));
@@ -30,7 +30,7 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
   };
 
 
-  // Permet de charger les arrondissements dans google maps (à l'aide du xml déjà chargé)
+  // Permet de charger les arrondissements dans google maps (Ã  l'aide du xml dÃ©jÃ  chargÃ©)
   context.chargerArrondissements = function() {
     context.arrondissements = [];
 

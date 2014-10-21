@@ -5,7 +5,7 @@ if (typeof com.dinfogarneau == "undefined") com.dinfogarneau = {};
 if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 = {};
 
 (function(context, util){
-  // Fonction gérant le chargement du menu et les événements y étant associés
+  // Fonction gÃ©rant le chargement du menu et les Ã©vÃ©nements y Ã©tant associÃ©s
   context.chargerMenu = function() {
     util.$('configuration').parentNode.addEventListener('click', function() {
       var config = util.$('panneau-config');
@@ -20,7 +20,7 @@ if (typeof com.dinfogarneau.cours526 == "undefined") com.dinfogarneau.cours526 =
     var listeZap = util.$('liste-zap');
     util.foreach(context.zap, function(zap){
       var li = document.createElement('li');
-      li.appendChild(document.createTextNode(zap.batiment));
+      li.appendChild(document.createTextNode(zap.batiment != null ? zap.batiment : 'BÃ¢timent inconnu'));
       listeZap.appendChild(li);
 
       li.addEventListener('click', function(e){
